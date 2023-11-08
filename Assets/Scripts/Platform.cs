@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,7 +6,7 @@ using UnityEngine;
 public class Platform : MonoBehaviour
 {
 	// General
-	public List<Platform> adjacentPaths = new List<Platform>();
+	public List<Platform> adjacentPlatforms = new List<Platform>();
 
 	// Called before update
 	private void Awake()
@@ -14,8 +15,13 @@ public class Platform : MonoBehaviour
 		foreach (Collider collider in colliders)
 		{
 			Platform platform = collider.GetComponent<Platform>();
-			if (platform != null && platform != this) adjacentPaths.Add(platform);
+			if (platform != null && platform != this) adjacentPlatforms.Add(platform);
 		}
-		Debug.Log(adjacentPaths.Count);
+	}
+
+	// Get path to platform
+	public List<Platform> GetPathTo(Platform platform)
+	{
+		return null;
 	}
 }
