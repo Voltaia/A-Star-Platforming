@@ -131,6 +131,22 @@ public class IndexedPriorityQueue
 		}
 	}
 
+	// Increase priority of key
+	public void IncreasePriority(object key, float priority)
+	{
+		if (priority <= priorities[key]) return;
+		priorities[key] = priority;
+		ReorderUp(indexes[key]);
+	}
+
+	// Decrease priority of key
+	public void DecreasePriority(object key, float priority)
+	{
+		if (priority >= priorities[key]) return;
+		priorities[key] = priority;
+		ReorderDown(indexes[key]);
+	}
+
 	// Convert to string
 	public override string ToString()
 	{
