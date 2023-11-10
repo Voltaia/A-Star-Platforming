@@ -2,20 +2,20 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IndexedPriorityQueue
+public class IndexedPriorityQueue<KeyType>
 {
 	// General
-	private Dictionary<object, int> indexes = new Dictionary<object, int>();
-	private Dictionary<object, float> priorities = new Dictionary<object, float>();
-	private Dictionary<int, object> keys = new Dictionary<int, object>();
-	private int count = 0;
+	private Dictionary<KeyType, int> indexes = new Dictionary<KeyType, int>();
+	private Dictionary<KeyType, float> priorities = new Dictionary<KeyType, float>();
+	private Dictionary<int, KeyType> keys = new Dictionary<int, KeyType>();
+	public int Count { get; private set; } = 0;
 
 	// Push onto binary heap
-	public void Push(object key, float priority)
+	public void Push(KeyType key, float priority)
 	{
 		// Push element to last index and then reorder it up
-		count++;
-		int lastIndex = count - 1;
+		Count++;
+		int lastIndex = Count - 1;
 		indexes[key] = lastIndex;
 		keys[lastIndex] = key;
 		priorities[key] = priority;
@@ -26,20 +26,20 @@ public class IndexedPriorityQueue
 	public object Pop()
 	{
 		// If we are out of keys, return null
-		if (count <= 0) return null;
+		if (Count <= 0) return null;
 
 		// Pop it
-		count--;
-		object poppedKey = keys[0];
+		Count--;
+		KeyType poppedKey = keys[0];
 		indexes.Remove(poppedKey);
 		priorities.Remove(poppedKey);
 
 		// Put the lowest key in the popped key's place and reorder down
-		if (count > 0)
+		if (Count > 0)
 		{
 			// Get replacement key
-			int lastIndex = count;
-			object newRootKey = keys[lastIndex];
+			int lastIndex = Count;
+			KeyType newRootKey = keys[lastIndex];
 			keys[0] = newRootKey;
 			indexes[newRootKey] = 0;
 			keys.Remove(lastIndex);
@@ -75,9 +75,9 @@ public class IndexedPriorityQueue
 		if (index == 0) return;
 
 		// Get the above key
-		object key = keys[index];
+		KeyType key = keys[index];
 		int parentIndex = GetParentIndex(index);
-		object parentKey = keys[parentIndex];
+		KeyType parentKey = keys[parentIndex];
 
 		// Check if current key is smaller than parent key
 		if (priorities[key] < priorities[parentKey])
@@ -97,20 +97,20 @@ public class IndexedPriorityQueue
 	public void ReorderDown(int index)
 	{
 		// Get the left and right indexes
-		object key = keys[index];
+		KeyType key = keys[index];
 		int leftIndex = GetLeftChildIndex(index);
 		int rightIndex = GetRightChildIndex(index);
 
 		// Check that we are within bounds
-		if (leftIndex < count)
+		if (leftIndex < Count)
 		{
-			object leftKey = keys[leftIndex];
-			if (rightIndex < count)
+			KeyType leftKey = keys[leftIndex];
+			if (rightIndex < Count)
 			{
-				object rightKey = keys[rightIndex];
+				KeyType rightKey = keys[rightIndex];
 
 				// Determine if the left or right element is smaller
-				object swapKey;
+				KeyType swapKey;
 				if (priorities[leftKey] < priorities[rightKey]) swapKey = leftKey;
 				else swapKey = rightKey;
 
@@ -132,7 +132,7 @@ public class IndexedPriorityQueue
 	}
 
 	// Increase priority of key
-	public void IncreasePriority(object key, float priority)
+	public void IncreasePriority(KeyType key, float priority)
 	{
 		if (priority <= priorities[key]) return;
 		priorities[key] = priority;
@@ -140,23 +140,29 @@ public class IndexedPriorityQueue
 	}
 
 	// Decrease priority of key
-	public void DecreasePriority(object key, float priority)
+	public void DecreasePriority(KeyType key, float priority)
 	{
 		if (priority >= priorities[key]) return;
 		priorities[key] = priority;
 		ReorderDown(indexes[key]);
 	}
 
+	// Check if key is in binary heap
+	public bool ContainsKey(KeyType key)
+	{
+		return indexes.ContainsKey(key);
+	}
+
 	// Convert to string
 	public override string ToString()
 	{
 		string keysString = "Keys Dictionary: ";
-		foreach (KeyValuePair<int, object> pair in keys)
+		foreach (KeyValuePair<int, KeyType> pair in keys)
 		{
 			keysString += $"[{pair.Key}: {pair.Value}]";
 		}
 		string indexesString = "Indexes Dictionary: ";
-		foreach (KeyValuePair<object, int> pair in indexes)
+		foreach (KeyValuePair<KeyType, int> pair in indexes)
 		{
 			indexesString += $"[{pair.Key}: {pair.Value}]";
 		}
