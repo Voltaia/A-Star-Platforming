@@ -8,7 +8,7 @@ public class TestStart : MonoBehaviour
 	{
 		Platform startPlatform = GetComponent<Platform>();
 		Platform endPlatform = FindObjectOfType<TestEnd>().GetComponent<Platform>();
-		List<Platform> platformPath = startPlatform.GetPathTo(endPlatform);
+		List<Platform> platformPath = World.GetPath(startPlatform, endPlatform);
 		Debug.Log(platformPath.Count);
 		string stringPath = string.Empty;
 		foreach (Platform platform in platformPath)
