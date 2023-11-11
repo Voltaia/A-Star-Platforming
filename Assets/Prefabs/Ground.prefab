@@ -46,7 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b14d61ffbbd247246a5c639877c4b54c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  adjacentPaths: []
+  statusIndicatorPrefab: {fileID: 8333445807206001685, guid: 5f75777d420d5bf40850528b9077e12d,
+    type: 3}
 --- !u!65 &1437844027298373998
 BoxCollider:
   m_ObjectHideFlags: 0

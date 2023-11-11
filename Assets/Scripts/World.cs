@@ -4,19 +4,38 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
-	public static List<Platform> GetPath(Platform fromPlatform, Platform toPlatform)
+	// General
+	private List<Platform> platformPath;
+
+	// Get path from platform A to platform B
+	public void CalculatePath(Platform fromPlatform, Platform toPlatform)
+	{
+		StartCoroutine(TraversePath(fromPlatform, toPlatform));
+	}
+
+	// Traverse the path step by step
+	private IEnumerator TraversePath(Platform fromPlatform, Platform toPlatform)
 	{
 		// Initialize
 		IndexedPriorityQueue<Platform> priorityQueue = new();
-		Dictionary<Platform, float> distanceFromStart = new();
+		Dictionary<Platform, float> distancesFromStart = new();
 		Dictionary<Platform, Platform> previousPlatforms = new();
 		HashSet<Platform> visited = new();
 
-		// Start here
-		priorityQueue.Push(fromPlatform, 0);
-		distanceFromStart[fromPlatform] = 0;
-		previousPlatforms[fromPlatform] = null;
-		visited.Add(fromPlatform);
+		// Visite platform
+		void VisitPlatform(Platform platform, Platform previousPlatform, float distanceFromStart)
+		{
+			priorityQueue.Push(platform, distanceFromStart);
+			distancesFromStart[platform] = distanceFromStart;
+			previousPlatforms[platform] = previousPlatform;
+			visited.Add(platform);
+
+			platform.SetStatus(Platform.Status.Visited);
+		}
+
+		// Visit the start platform
+		VisitPlatform(fromPlatform, null, 0.0f);
+		yield return new WaitForSeconds(0.5f);
 
 		// Loop through platforms in priority queue
 		while (priorityQueue.Count > 0)
@@ -28,23 +47,21 @@ public class World : MonoBehaviour
 			foreach (Platform discoveredPlatform in poppedPlatform.adjacentPlatforms)
 			{
 				// Get distance
-				float discoveredDistance = distanceFromStart[poppedPlatform] + 1;
+				float discoveredDistance = distancesFromStart[poppedPlatform] + 1;
 
 				// Check if it is in IPQ, otherwise, check if it has been visited
 				if (priorityQueue.ContainsKey(discoveredPlatform))
 				{
 					// Decrease priority and define shorter path
 					priorityQueue.DecreasePriority(discoveredPlatform, discoveredDistance);
-					distanceFromStart[discoveredPlatform] = discoveredDistance;
+					distancesFromStart[discoveredPlatform] = discoveredDistance;
 					previousPlatforms[discoveredPlatform] = poppedPlatform;
 				}
 				else if (!visited.Contains(discoveredPlatform))
 				{
 					// Add patform to data structures
-					distanceFromStart[discoveredPlatform] = discoveredDistance;
-					previousPlatforms[discoveredPlatform] = poppedPlatform;
-					priorityQueue.Push(discoveredPlatform, discoveredDistance);
-					visited.Add(discoveredPlatform);
+					VisitPlatform(discoveredPlatform, poppedPlatform, discoveredDistance);
+					yield return new WaitForSeconds(0.5f);
 				}
 
 				// Check if this is our goal
@@ -54,19 +71,12 @@ public class World : MonoBehaviour
 
 	// Found the goal, now backtrace and return the result
 	FoundGoal:
-		List<Platform> platformPath = new();
+		platformPath = new();
 		Platform backtracePlatform = toPlatform;
 		while (backtracePlatform != null)
 		{
 			platformPath.Insert(0, backtracePlatform);
 			backtracePlatform = previousPlatforms[backtracePlatform];
 		}
-		return platformPath;
-	}
-
-	// Traverse the path step by step
-	private IEnumerator TraversePath(Platform fromPlatform, Platform toPlatform)
-	{
-		yield return null;
 	}
 }
