@@ -5,8 +5,11 @@ using UnityEngine;
 public class World : MonoBehaviour
 {
 	// General
-	private List<Platform> platformPath = new();
+	public List<Platform> platformPath = new();
 	public bool calculatingPath = false;
+
+	// Settings
+	private const float StepTime = 0.25f;
 
 	// Get path from platform A to platform B
 	public void CalculatePath(Platform fromPlatform, Platform toPlatform)
@@ -40,7 +43,7 @@ public class World : MonoBehaviour
 
 		// Visit the start platform
 		VisitPlatform(fromPlatform, null, 0.0f);
-		yield return new WaitForSeconds(0.5f);
+		yield return new WaitForSeconds(StepTime);
 
 		// Loop through platforms in priority queue
 		while (priorityQueue.Count > 0)
@@ -66,7 +69,7 @@ public class World : MonoBehaviour
 				{
 					// Add patform to data structures
 					VisitPlatform(discoveredPlatform, poppedPlatform, discoveredDistance);
-					yield return new WaitForSeconds(0.5f);
+					yield return new WaitForSeconds(StepTime);
 				}
 
 				// Check if this is our goal
@@ -82,7 +85,7 @@ public class World : MonoBehaviour
 			platformPath.Insert(0, backtracePlatform);
 			backtracePlatform.SetStatus(Platform.Status.Path);
 			backtracePlatform = previousPlatforms[backtracePlatform];
-			yield return new WaitForSeconds(0.5f);
+			yield return new WaitForSeconds(StepTime);
 		}
 		calculatingPath = false;
 	}
