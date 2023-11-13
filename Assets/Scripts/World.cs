@@ -5,11 +5,14 @@ using UnityEngine;
 public class World : MonoBehaviour
 {
 	// General
-	private List<Platform> platformPath;
+	private List<Platform> platformPath = new();
 
 	// Get path from platform A to platform B
 	public void CalculatePath(Platform fromPlatform, Platform toPlatform)
 	{
+		StopAllCoroutines();
+		foreach (Platform platform in FindObjectsOfType<Platform>()) platform.SetStatus(Platform.Status.Unvisited);
+		platformPath.Clear();
 		StartCoroutine(TraversePath(fromPlatform, toPlatform));
 	}
 
@@ -71,7 +74,6 @@ public class World : MonoBehaviour
 
 	// Found the goal, now backtrace and return the result
 	FoundGoal:
-		platformPath = new();
 		Platform backtracePlatform = toPlatform;
 		while (backtracePlatform != null)
 		{

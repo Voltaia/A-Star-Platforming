@@ -11,6 +11,11 @@ public class Platform : MonoBehaviour
 	// General
 	[NonSerialized] public List<Platform> adjacentPlatforms = new();
 	private GameObject statusIndicator;
+	private MeshRenderer meshRenderer;
+	private Color defaultColor;
+	private Color hoverColor;
+	private Color goalColor;
+	private Player player;
 
 	// Status types
 	public enum Status
@@ -26,13 +31,22 @@ public class Platform : MonoBehaviour
 		Collider[] colliders = Physics.OverlapSphere(transform.position, 0.5f);
 		foreach (Collider collider in colliders)
 		{
-			Platform platform = collider.GetComponent<Platform>();
+			Platform platform = collider.GetComponentInParent<Platform>(true);
 			if (platform != null && platform != this) adjacentPlatforms.Add(platform);
 		}
 
 		// Create status indicator
-		statusIndicator = Instantiate(statusIndicatorPrefab, transform.position + Vector3.up * 2.0f, Quaternion.identity, transform);
+		statusIndicator = Instantiate(statusIndicatorPrefab, transform.position + Vector3.up, Quaternion.identity, transform);
 		SetStatus(Status.Unvisited);
+
+		// Get material
+		meshRenderer = GetComponentInChildren<MeshRenderer>();
+		defaultColor = meshRenderer.material.color;
+		hoverColor = defaultColor + new Color(0.25f, 0.25f, 0.25f);
+		goalColor = defaultColor + new Color(0.5f, 0.5f, 0.0f);
+
+		// Get player
+		player = FindObjectOfType<Player>();
 	}
 
 	// Set status
@@ -54,5 +68,31 @@ public class Platform : MonoBehaviour
 	public float GetDistanceTo(Platform platform)
 	{
 		return Vector3.Distance(transform.position, platform.transform.position);
+	}
+
+	// When mouse enters collider
+	private void OnMouseEnter()
+	{
+		if (this != player.GoalPlatform)
+		{
+			meshRenderer.material.color = hoverColor;
+		}
+	}
+
+	// When mouse is over collider
+	private void OnMouseOver()
+	{
+		if (Input.GetMouseButtonDown(0))
+		{
+			if (player.GoalPlatform != null) player.GoalPlatform.meshRenderer.material.color = defaultColor;
+			meshRenderer.material.color = goalColor;
+			player.GoalPlatform = this;
+		}
+	}
+
+	// When mouse exits collider
+	private void OnMouseExit()
+	{
+		if (this != player.GoalPlatform) meshRenderer.material.color = defaultColor;
 	}
 }

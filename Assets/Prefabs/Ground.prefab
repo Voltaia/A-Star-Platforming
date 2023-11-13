@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1073752013344318591}
   - component: {fileID: 1409430712544954785}
-  - component: {fileID: 1437844027298373998}
+  - component: {fileID: 4756591392033099106}
   m_Layer: 0
   m_Name: Ground
   m_TagString: Untagged
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   statusIndicatorPrefab: {fileID: 8333445807206001685, guid: 5f75777d420d5bf40850528b9077e12d,
     type: 3}
---- !u!65 &1437844027298373998
+--- !u!65 &4756591392033099106
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
