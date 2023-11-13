@@ -6,6 +6,7 @@ public class World : MonoBehaviour
 {
 	// General
 	private List<Platform> platformPath = new();
+	public bool calculatingPath = false;
 
 	// Get path from platform A to platform B
 	public void CalculatePath(Platform fromPlatform, Platform toPlatform)
@@ -14,6 +15,7 @@ public class World : MonoBehaviour
 		foreach (Platform platform in FindObjectsOfType<Platform>()) platform.SetStatus(Platform.Status.Unvisited);
 		platformPath.Clear();
 		StartCoroutine(TraversePath(fromPlatform, toPlatform));
+		calculatingPath = true;
 	}
 
 	// Traverse the path step by step
@@ -78,7 +80,10 @@ public class World : MonoBehaviour
 		while (backtracePlatform != null)
 		{
 			platformPath.Insert(0, backtracePlatform);
+			backtracePlatform.SetStatus(Platform.Status.Path);
 			backtracePlatform = previousPlatforms[backtracePlatform];
+			yield return new WaitForSeconds(0.5f);
 		}
+		calculatingPath = false;
 	}
 }

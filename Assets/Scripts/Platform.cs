@@ -10,18 +10,24 @@ public class Platform : MonoBehaviour
 
 	// General
 	[NonSerialized] public List<Platform> adjacentPlatforms = new();
-	private GameObject statusIndicator;
+	private Player player;
 	private MeshRenderer meshRenderer;
 	private Color defaultColor;
 	private Color hoverColor;
 	private Color goalColor;
-	private Player player;
+
+	// Status indicator
+	private GameObject statusIndicator;
+	private MeshRenderer statusMeshRenderer;
+	private Color defaultStatusColor;
+	private Color pathStatusColor;
 
 	// Status types
 	public enum Status
 	{
 		Unvisited,
-		Visited
+		Visited,
+		Path
 	}
 
 	// Called before update
@@ -45,6 +51,11 @@ public class Platform : MonoBehaviour
 		hoverColor = defaultColor + new Color(0.25f, 0.25f, 0.25f);
 		goalColor = defaultColor + new Color(0.5f, 0.5f, 0.0f);
 
+		// Repeat for status indicator
+		statusMeshRenderer = statusIndicator.GetComponent<MeshRenderer>();
+		defaultStatusColor = statusMeshRenderer.material.color;
+		pathStatusColor = new Color(1.0f, 1.0f, 0.0f);
+
 		// Get player
 		player = FindObjectOfType<Player>();
 	}
@@ -60,6 +71,12 @@ public class Platform : MonoBehaviour
 
 			case Status.Visited:
 				statusIndicator.SetActive(true);
+				statusMeshRenderer.material.color = defaultStatusColor;
+				break;
+
+			case Status.Path:
+				statusIndicator.SetActive(true);
+				statusMeshRenderer.material.color = pathStatusColor;
 				break;
 		}
 	}

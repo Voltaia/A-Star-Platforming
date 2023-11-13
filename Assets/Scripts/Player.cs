@@ -11,7 +11,8 @@ public class Player : MonoBehaviour
 		get { return goalPlatform; }
 		set {
 			goalPlatform = value;
-			MoveToGoal();
+			QueuePathCalculation();
+			StartCoroutine(FollowPath());
 		}
 	}
 	private World world;
@@ -22,11 +23,17 @@ public class Player : MonoBehaviour
 		world = FindObjectOfType<World>();
 	}
 
-	// Start followin a path
-	private void MoveToGoal()
+	// Calculate path calculation
+	private void QueuePathCalculation()
 	{
 		Physics.Raycast(transform.position, Vector3.down, out RaycastHit raycastHit);
 		Platform currentPlatform = raycastHit.collider.GetComponentInParent<Platform>(true);
 		world.CalculatePath(currentPlatform, GoalPlatform);
+	}
+
+	// Move to goal
+	private IEnumerator FollowPath()
+	{
+		yield return null;
 	}
 }
