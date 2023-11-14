@@ -101,7 +101,7 @@ public class Platform : MonoBehaviour
 	{
 		if (Input.GetMouseButtonDown(0))
 		{
-			if (player.GoalPlatform != null) player.GoalPlatform.meshRenderer.material.color = defaultColor;
+			if (player.GoalPlatform != null) player.GoalPlatform.meshRenderer.material.color = player.GoalPlatform.defaultColor;
 			meshRenderer.material.color = goalColor;
 			player.GoalPlatform = this;
 		}
