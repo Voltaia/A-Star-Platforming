@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IndexedPriorityQueue<KeyType>
+public class IndexedPriorityQueue<Key>
 {
 	// General
-	private Dictionary<KeyType, int> indexes = new Dictionary<KeyType, int>();
-	private Dictionary<KeyType, float> priorities = new Dictionary<KeyType, float>();
-	private Dictionary<int, KeyType> keys = new Dictionary<int, KeyType>();
+	private Dictionary<Key, int> indexes = new Dictionary<Key, int>();
+	private Dictionary<Key, float> priorities = new Dictionary<Key, float>();
+	private Dictionary<int, Key> keys = new Dictionary<int, Key>();
 	public int Count { get; private set; } = 0;
 
 	// Push onto binary heap
-	public void Push(KeyType key, float priority)
+	public void Push(Key key, float priority)
 	{
 		// Push element to last index and then reorder it up
 		Count++;
@@ -30,7 +30,7 @@ public class IndexedPriorityQueue<KeyType>
 
 		// Pop it
 		Count--;
-		KeyType poppedKey = keys[0];
+		Key poppedKey = keys[0];
 		indexes.Remove(poppedKey);
 		priorities.Remove(poppedKey);
 
@@ -39,7 +39,7 @@ public class IndexedPriorityQueue<KeyType>
 		{
 			// Get replacement key
 			int lastIndex = Count;
-			KeyType newRootKey = keys[lastIndex];
+			Key newRootKey = keys[lastIndex];
 			keys[0] = newRootKey;
 			indexes[newRootKey] = 0;
 			keys.Remove(lastIndex);
@@ -53,7 +53,7 @@ public class IndexedPriorityQueue<KeyType>
 	// Get above index in binary heap
 	public int GetParentIndex(int childIndex)
 	{
-		return (childIndex - 1) % 2;
+		return (childIndex - 1) / 2;
 	}
 
 	// Get lower left index in binary heap
@@ -75,9 +75,9 @@ public class IndexedPriorityQueue<KeyType>
 		if (index == 0) return;
 
 		// Get the above key
-		KeyType key = keys[index];
+		Key key = keys[index];
 		int parentIndex = GetParentIndex(index);
-		KeyType parentKey = keys[parentIndex];
+		Key parentKey = keys[parentIndex];
 
 		// Check if current key is smaller than parent key
 		if (priorities[key] < priorities[parentKey])
@@ -97,42 +97,41 @@ public class IndexedPriorityQueue<KeyType>
 	public void ReorderDown(int index)
 	{
 		// Get the left and right indexes
-		KeyType key = keys[index];
+		Key key = keys[index];
 		int leftIndex = GetLeftChildIndex(index);
 		int rightIndex = GetRightChildIndex(index);
 
 		// Check that we are within bounds
+		Key swapKey;
 		if (leftIndex < Count)
 		{
-			KeyType leftKey = keys[leftIndex];
+			// Replace with right key if lower
+			Key leftKey = keys[leftIndex];
+			swapKey = leftKey;
 			if (rightIndex < Count)
 			{
-				KeyType rightKey = keys[rightIndex];
+				Key rightKey = keys[rightIndex];
+				if (priorities[rightKey] < priorities[leftKey]) swapKey = rightKey;
+			}
 
-				// Determine if the left or right element is smaller
-				KeyType swapKey;
-				if (priorities[leftKey] < priorities[rightKey]) swapKey = leftKey;
-				else swapKey = rightKey;
+			// If the smaller child is smaller than the parent, swap them
+			if (priorities[key] > priorities[swapKey])
+			{
+				// Swap child and parent
+				int swapIndex = indexes[swapKey];
+				indexes[key] = swapIndex;
+				keys[index] = swapKey;
+				indexes[swapKey] = index;
+				keys[swapIndex] = key;
 
-				// If the smaller child is smaller than the parent, swap them
-				if (priorities[key] > priorities[swapKey])
-				{
-					// Swap child and parent
-					int swapIndex = indexes[swapKey];
-					indexes[key] = swapIndex;
-					keys[index] = swapKey;
-					indexes[swapKey] = index;
-					keys[swapIndex] = key;
-
-					// Recurse
-					ReorderDown(swapIndex);
-				}
+				// Recurse
+				ReorderDown(swapIndex);
 			}
 		}
 	}
 
 	// Increase priority of key
-	public void IncreasePriority(KeyType key, float priority)
+	public void IncreasePriority(Key key, float priority)
 	{
 		if (priority <= priorities[key]) return;
 		priorities[key] = priority;
@@ -140,7 +139,7 @@ public class IndexedPriorityQueue<KeyType>
 	}
 
 	// Decrease priority of key
-	public void DecreasePriority(KeyType key, float priority)
+	public void DecreasePriority(Key key, float priority)
 	{
 		if (priority >= priorities[key]) return;
 		priorities[key] = priority;
@@ -148,7 +147,7 @@ public class IndexedPriorityQueue<KeyType>
 	}
 
 	// Check if key is in binary heap
-	public bool ContainsKey(KeyType key)
+	public bool ContainsKey(Key key)
 	{
 		return indexes.ContainsKey(key);
 	}
@@ -157,12 +156,12 @@ public class IndexedPriorityQueue<KeyType>
 	public override string ToString()
 	{
 		string keysString = "Keys Dictionary: ";
-		foreach (KeyValuePair<int, KeyType> pair in keys)
+		foreach (KeyValuePair<int, Key> pair in keys)
 		{
 			keysString += $"[{pair.Key}: {pair.Value}]";
 		}
 		string indexesString = "Indexes Dictionary: ";
-		foreach (KeyValuePair<KeyType, int> pair in indexes)
+		foreach (KeyValuePair<Key, int> pair in indexes)
 		{
 			indexesString += $"[{pair.Key}: {pair.Value}]";
 		}

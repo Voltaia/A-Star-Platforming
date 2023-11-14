@@ -64,6 +64,7 @@ public class World : MonoBehaviour
 					priorityQueue.DecreasePriority(discoveredPlatform, discoveredDistance);
 					distancesFromStart[discoveredPlatform] = discoveredDistance;
 					previousPlatforms[discoveredPlatform] = poppedPlatform;
+					Debug.Log("Decrease priority, make sure this works if you see this");
 				}
 				else if (!visited.Contains(discoveredPlatform))
 				{
