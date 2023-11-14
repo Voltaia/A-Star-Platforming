@@ -18,16 +18,26 @@ public class Player : MonoBehaviour
 	}
 	private World world;
 	private new Rigidbody rigidbody;
+	private Quaternion desiredRotation;
 
 	// Settings
-	private const float JumpForce = 4.0f;
-	private const float DirectionalForce = 2.5f;
+	private const float JumpForce = 2.5f;
+	private const float DirectionalForce = 2.0f;
+	private const float JumpWaitTime = 0.6f;
 
 	// Called on intialization
 	private void Awake()
 	{
 		world = FindObjectOfType<World>();
 		rigidbody = GetComponent<Rigidbody>();
+		desiredRotation = transform.rotation;
+	}
+
+	// Called every physics frame
+	private void FixedUpdate()
+	{
+		Quaternion nextRotation = Quaternion.Lerp(transform.rotation, desiredRotation, 0.15f);
+		rigidbody.MoveRotation(nextRotation);
 	}
 
 	// Calculate path calculation
@@ -56,11 +66,13 @@ public class Player : MonoBehaviour
 				// Jump
 				yield return new WaitForFixedUpdate();
 				Vector3 direction = (nextPlatform.transform.position - transform.position).normalized;
+				direction = Vector3.ProjectOnPlane(direction, Vector3.up);
 				Vector3 jumpForce = (direction * DirectionalForce + Vector3.up * JumpForce);
 				rigidbody.AddForce(jumpForce, ForceMode.Impulse);
+				desiredRotation = Quaternion.LookRotation(direction);
 
 				// Wait to land and check current platform
-				yield return new WaitForSeconds(0.5f);
+				yield return new WaitForSeconds(JumpWaitTime);
 				currentPlatform = GetCurrentPlatform();
 			}
 		}
