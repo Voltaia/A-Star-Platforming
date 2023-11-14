@@ -66,10 +66,10 @@ public class Player : MonoBehaviour
 				// Jump
 				yield return new WaitForFixedUpdate();
 				Vector3 direction = (nextPlatform.transform.position - transform.position).normalized;
-				direction = Vector3.ProjectOnPlane(direction, Vector3.up);
-				Vector3 jumpForce = (direction * DirectionalForce + Vector3.up * JumpForce);
+				Vector3 jumpDirection = Vector3.ProjectOnPlane(direction, Vector3.up);
+				Vector3 jumpForce = (jumpDirection * DirectionalForce + Vector3.up * JumpForce);
 				rigidbody.AddForce(jumpForce, ForceMode.Impulse);
-				desiredRotation = Quaternion.LookRotation(direction);
+				desiredRotation = Quaternion.LookRotation(jumpDirection);
 
 				// Wait to land and check current platform
 				yield return new WaitForSeconds(JumpWaitTime);

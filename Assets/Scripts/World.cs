@@ -7,22 +7,48 @@ public class World : MonoBehaviour
 	// General
 	public List<Platform> platformPath = new();
 	public bool calculatingPath = false;
+	private Heuristic heuristic = Heuristic.Dijkstras;
 
 	// Settings
 	private const float StepTime = 0.25f;
 
+	// Heuristic type
+	private enum Heuristic
+	{
+		Dijkstras,
+		Manhattan,
+		Euclidian,
+	}
+
 	// Get path from platform A to platform B
-	public void CalculatePath(Platform fromPlatform, Platform toPlatform)
+	public void CalculatePath(Platform startPlatform, Platform endPlatform)
 	{
 		StopAllCoroutines();
 		foreach (Platform platform in FindObjectsOfType<Platform>()) platform.SetStatus(Platform.Status.Unvisited);
 		platformPath.Clear();
-		StartCoroutine(TraversePath(fromPlatform, toPlatform));
+		StartCoroutine(TraversePath(startPlatform, endPlatform));
 		calculatingPath = true;
 	}
 
+	// Dijkstra's heuristic
+	private float GetHeuristic(Platform currentPlatform, Platform nextPlatform)
+	{
+		// Swap heuristics
+		switch (heuristic)
+		{
+			case Heuristic.Manhattan:
+				break;
+
+			case Heuristic.Euclidian:
+				break;
+		}
+
+		// Dijkstra's defaults to nothing
+		return 0.0f;
+	}
+
 	// Traverse the path step by step
-	private IEnumerator TraversePath(Platform fromPlatform, Platform toPlatform)
+	private IEnumerator TraversePath(Platform startPlatform, Platform endPlatform)
 	{
 		// Initialize
 		IndexedPriorityQueue<Platform> priorityQueue = new();
@@ -42,7 +68,7 @@ public class World : MonoBehaviour
 		}
 
 		// Visit the start platform
-		VisitPlatform(fromPlatform, null, 0.0f);
+		VisitPlatform(startPlatform, null, 0.0f);
 		yield return new WaitForSeconds(StepTime);
 
 		// Loop through platforms in priority queue
@@ -55,7 +81,9 @@ public class World : MonoBehaviour
 			foreach (Platform discoveredPlatform in poppedPlatform.adjacentPlatforms)
 			{
 				// Get distance
-				float discoveredDistance = distancesFromStart[poppedPlatform] + 1;
+				float distanceWeight = Vector3.Distance(poppedPlatform.transform.position, discoveredPlatform.transform.position);
+				float heuristic = GetHeuristic(poppedPlatform, discoveredPlatform);
+				float discoveredDistance = distancesFromStart[poppedPlatform] + distanceWeight + heuristic;
 
 				// Check if it is in IPQ, otherwise, check if it has been visited
 				if (priorityQueue.ContainsKey(discoveredPlatform))
@@ -74,13 +102,13 @@ public class World : MonoBehaviour
 				}
 
 				// Check if this is our goal
-				if (toPlatform == discoveredPlatform) goto FoundGoal;
+				if (endPlatform == discoveredPlatform) goto FoundGoal;
 			}
 		}
 
 	// Found the goal, now backtrace and return the result
 	FoundGoal:
-		Platform backtracePlatform = toPlatform;
+		Platform backtracePlatform = endPlatform;
 		while (backtracePlatform != null)
 		{
 			platformPath.Insert(0, backtracePlatform);
