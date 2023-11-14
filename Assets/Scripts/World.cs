@@ -7,7 +7,7 @@ public class World : MonoBehaviour
 	// General
 	public List<Platform> platformPath = new();
 	public bool calculatingPath = false;
-	private Heuristic heuristic = Heuristic.Dijkstras;
+	private Heuristic heuristic = Heuristic.Euclidian;
 
 	// Settings
 	private const float StepTime = 0.25f;
@@ -31,16 +31,27 @@ public class World : MonoBehaviour
 	}
 
 	// Dijkstra's heuristic
-	private float GetHeuristic(Platform currentPlatform, Platform nextPlatform)
+	private float GetHeuristic(Platform currentPlatform, Platform endPlatform)
 	{
 		// Swap heuristics
 		switch (heuristic)
 		{
 			case Heuristic.Manhattan:
-				break;
+				{
+					Vector3 currentPosition = currentPlatform.transform.position;
+					Vector3 endPosition = endPlatform.transform.position;
+					float deltaX = Mathf.Abs(currentPosition.x - endPosition.x);
+					float deltaY = Mathf.Abs(currentPosition.y - endPosition.y);
+					float deltaZ = Mathf.Abs(currentPosition.z - endPosition.z);
+					return deltaX + deltaY + deltaZ;
+				}
 
 			case Heuristic.Euclidian:
-				break;
+				{
+					Vector3 currentPosition = currentPlatform.transform.position;
+					Vector3 endPosition = endPlatform.transform.position;
+					return Vector3.Distance(currentPosition, endPosition);
+				}
 		}
 
 		// Dijkstra's defaults to nothing
@@ -82,7 +93,7 @@ public class World : MonoBehaviour
 			{
 				// Get distance
 				float distanceWeight = Vector3.Distance(poppedPlatform.transform.position, discoveredPlatform.transform.position);
-				float heuristic = GetHeuristic(poppedPlatform, discoveredPlatform);
+				float heuristic = GetHeuristic(discoveredPlatform, endPlatform);
 				float discoveredDistance = distancesFromStart[poppedPlatform] + distanceWeight + heuristic;
 
 				// Check if it is in IPQ, otherwise, check if it has been visited
