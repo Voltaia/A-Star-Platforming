@@ -1,16 +1,22 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class World : MonoBehaviour
 {
+	// Inspector
+	public UIDocument UIDocument;
+
 	// General
-	public List<Platform> platformPath = new();
-	public bool calculatingPath = false;
-	private Heuristic heuristic = Heuristic.Euclidian;
+	[NonSerialized] public List<Platform> PlatformPath = new();
+	[NonSerialized] public bool CalculatingPath = false;
+	private Heuristic _heuristic = Heuristic.Dijkstras;
+	private Label _currentAlgorithmLabel;
 
 	// Settings
-	private const float StepTime = 0.25f;
+	private const float _stepTime = 0.25f;
 
 	// Heuristic type
 	private enum Heuristic
@@ -20,21 +26,51 @@ public class World : MonoBehaviour
 		Euclidian,
 	}
 
+	// Called on initialization
+	private void Awake()
+	{
+		_currentAlgorithmLabel = UIDocument.rootVisualElement.Q<Label>("current-algorithm");
+	}
+
+	// Called every frame
+	private void Update()
+	{
+		if (!Input.GetKeyDown(KeyCode.Space)) return;
+
+		switch (_heuristic)
+		{
+			case Heuristic.Dijkstras:
+				_heuristic = Heuristic.Manhattan;
+				_currentAlgorithmLabel.text = "Current Algorithm: Manhattan A*";
+				break;
+
+			case Heuristic.Manhattan:
+				_heuristic = Heuristic.Euclidian;
+				_currentAlgorithmLabel.text = "Current Algorithm: Euclidian A*";
+				break;
+
+			case Heuristic.Euclidian:
+				_heuristic = Heuristic.Dijkstras;
+				_currentAlgorithmLabel.text = "Current Algorithm: Dijkstra's";
+				break;
+		}
+	}
+
 	// Get path from platform A to platform B
 	public void CalculatePath(Platform startPlatform, Platform endPlatform)
 	{
 		StopAllCoroutines();
 		foreach (Platform platform in FindObjectsOfType<Platform>()) platform.SetStatus(Platform.Status.Unvisited);
-		platformPath.Clear();
+		PlatformPath.Clear();
 		StartCoroutine(TraversePath(startPlatform, endPlatform));
-		calculatingPath = true;
+		CalculatingPath = true;
 	}
 
 	// Dijkstra's heuristic
 	private float GetHeuristic(Platform currentPlatform, Platform endPlatform)
 	{
 		// Swap heuristics
-		switch (heuristic)
+		switch (_heuristic)
 		{
 			case Heuristic.Manhattan:
 				{
@@ -80,7 +116,7 @@ public class World : MonoBehaviour
 
 		// Visit the start platform
 		VisitPlatform(startPlatform, null, 0.0f);
-		yield return new WaitForSeconds(StepTime);
+		yield return new WaitForSeconds(_stepTime);
 
 		// Loop through platforms in priority queue
 		while (priorityQueue.Count > 0)
@@ -89,7 +125,7 @@ public class World : MonoBehaviour
 			Platform poppedPlatform = (Platform)priorityQueue.Pop();
 
 			// Loop through adjacent platforms
-			foreach (Platform discoveredPlatform in poppedPlatform.adjacentPlatforms)
+			foreach (Platform discoveredPlatform in poppedPlatform.AdjacentPlatforms)
 			{
 				// Get distance
 				float distanceWeight = Vector3.Distance(poppedPlatform.transform.position, discoveredPlatform.transform.position);
@@ -109,7 +145,7 @@ public class World : MonoBehaviour
 				{
 					// Add patform to data structures
 					VisitPlatform(discoveredPlatform, poppedPlatform, discoveredDistance);
-					yield return new WaitForSeconds(StepTime);
+					yield return new WaitForSeconds(_stepTime);
 				}
 
 				// Check if this is our goal
@@ -122,11 +158,11 @@ public class World : MonoBehaviour
 		Platform backtracePlatform = endPlatform;
 		while (backtracePlatform != null)
 		{
-			platformPath.Insert(0, backtracePlatform);
+			PlatformPath.Insert(0, backtracePlatform);
 			backtracePlatform.SetStatus(Platform.Status.Path);
 			backtracePlatform = previousPlatforms[backtracePlatform];
-			yield return new WaitForSeconds(StepTime);
+			yield return new WaitForSeconds(_stepTime);
 		}
-		calculatingPath = false;
+		CalculatingPath = false;
 	}
 }

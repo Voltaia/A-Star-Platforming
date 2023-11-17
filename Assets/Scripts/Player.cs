@@ -5,20 +5,20 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
 	// General
-	private Platform goalPlatform;
+	private Platform _goalPlatform;
 	public Platform GoalPlatform
 	{
-		get { return goalPlatform; }
+		get { return _goalPlatform; }
 		set {
-			goalPlatform = value;
+			_goalPlatform = value;
 			QueuePathCalculation();
 			StopAllCoroutines();
 			StartCoroutine(FollowPath());
 		}
 	}
-	private World world;
-	private new Rigidbody rigidbody;
-	private Quaternion desiredRotation;
+	private World _world;
+	private Rigidbody _rigidbody;
+	private Quaternion _desiredRotation;
 
 	// Settings
 	private const float JumpForce = 2.5f;
@@ -28,22 +28,22 @@ public class Player : MonoBehaviour
 	// Called on intialization
 	private void Awake()
 	{
-		world = FindObjectOfType<World>();
-		rigidbody = GetComponent<Rigidbody>();
-		desiredRotation = transform.rotation;
+		_world = FindObjectOfType<World>();
+		_rigidbody = GetComponent<Rigidbody>();
+		_desiredRotation = transform.rotation;
 	}
 
 	// Called every physics frame
 	private void FixedUpdate()
 	{
-		Quaternion nextRotation = Quaternion.Lerp(transform.rotation, desiredRotation, 0.15f);
-		rigidbody.MoveRotation(nextRotation);
+		Quaternion nextRotation = Quaternion.Lerp(transform.rotation, _desiredRotation, 0.15f);
+		_rigidbody.MoveRotation(nextRotation);
 	}
 
 	// Calculate path calculation
 	private void QueuePathCalculation()
 	{
-		world.CalculatePath(GetCurrentPlatform(), GoalPlatform);
+		_world.CalculatePath(GetCurrentPlatform(), GoalPlatform);
 	}
 
 	// Below platform
@@ -56,9 +56,9 @@ public class Player : MonoBehaviour
 	// Move to goal
 	private IEnumerator FollowPath()
 	{
-		yield return new WaitWhile(() => world.calculatingPath);
+		yield return new WaitWhile(() => _world.CalculatingPath);
 		
-		foreach (Platform nextPlatform in world.platformPath)
+		foreach (Platform nextPlatform in _world.PlatformPath)
 		{
 			Platform currentPlatform = GetCurrentPlatform();
 			while (currentPlatform != nextPlatform)
@@ -68,8 +68,8 @@ public class Player : MonoBehaviour
 				Vector3 direction = (nextPlatform.transform.position - transform.position).normalized;
 				Vector3 jumpDirection = Vector3.ProjectOnPlane(direction, Vector3.up);
 				Vector3 jumpForce = (jumpDirection * DirectionalForce + Vector3.up * JumpForce);
-				rigidbody.AddForce(jumpForce, ForceMode.Impulse);
-				desiredRotation = Quaternion.LookRotation(jumpDirection);
+				_rigidbody.AddForce(jumpForce, ForceMode.Impulse);
+				_desiredRotation = Quaternion.LookRotation(jumpDirection);
 
 				// Wait to land and check current platform
 				yield return new WaitForSeconds(JumpWaitTime);

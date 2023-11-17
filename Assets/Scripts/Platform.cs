@@ -9,12 +9,12 @@ public class Platform : MonoBehaviour
 	public GameObject statusIndicatorPrefab;
 
 	// General
-	[NonSerialized] public List<Platform> adjacentPlatforms = new();
-	private Player player;
-	private MeshRenderer meshRenderer;
-	private Color defaultColor;
-	private Color hoverColor;
-	private Color goalColor;
+	[NonSerialized] public List<Platform> AdjacentPlatforms = new();
+	private Player _player;
+	private MeshRenderer _meshRenderer;
+	private Color _defaultColor;
+	private Color _hoverColor;
+	private Color _goalColor;
 
 	// Status indicator
 	private GameObject statusIndicator;
@@ -38,7 +38,7 @@ public class Platform : MonoBehaviour
 		foreach (Collider collider in colliders)
 		{
 			Platform platform = collider.GetComponentInParent<Platform>(true);
-			if (platform != null && platform != this) adjacentPlatforms.Add(platform);
+			if (platform != null && platform != this) AdjacentPlatforms.Add(platform);
 		}
 
 		// Create status indicator
@@ -46,10 +46,10 @@ public class Platform : MonoBehaviour
 		SetStatus(Status.Unvisited);
 
 		// Get material
-		meshRenderer = GetComponentInChildren<MeshRenderer>();
-		defaultColor = meshRenderer.material.color;
-		hoverColor = defaultColor + new Color(0.25f, 0.25f, 0.25f);
-		goalColor = defaultColor + new Color(0.5f, 0.5f, 0.0f);
+		_meshRenderer = GetComponentInChildren<MeshRenderer>();
+		_defaultColor = _meshRenderer.material.color;
+		_hoverColor = _defaultColor + new Color(0.25f, 0.25f, 0.25f);
+		_goalColor = _defaultColor + new Color(0.5f, 0.5f, 0.0f);
 
 		// Repeat for status indicator
 		statusMeshRenderer = statusIndicator.GetComponent<MeshRenderer>();
@@ -57,7 +57,7 @@ public class Platform : MonoBehaviour
 		pathStatusColor = new Color(1.0f, 1.0f, 0.0f);
 
 		// Get player
-		player = FindObjectOfType<Player>();
+		_player = FindObjectOfType<Player>();
 	}
 
 	// Set status
@@ -90,9 +90,9 @@ public class Platform : MonoBehaviour
 	// When mouse enters collider
 	private void OnMouseEnter()
 	{
-		if (this != player.GoalPlatform)
+		if (this != _player.GoalPlatform)
 		{
-			meshRenderer.material.color = hoverColor;
+			_meshRenderer.material.color = _hoverColor;
 		}
 	}
 
@@ -101,15 +101,15 @@ public class Platform : MonoBehaviour
 	{
 		if (Input.GetMouseButtonDown(0))
 		{
-			if (player.GoalPlatform != null) player.GoalPlatform.meshRenderer.material.color = player.GoalPlatform.defaultColor;
-			meshRenderer.material.color = goalColor;
-			player.GoalPlatform = this;
+			if (_player.GoalPlatform != null) _player.GoalPlatform._meshRenderer.material.color = _player.GoalPlatform._defaultColor;
+			_meshRenderer.material.color = _goalColor;
+			_player.GoalPlatform = this;
 		}
 	}
 
 	// When mouse exits collider
 	private void OnMouseExit()
 	{
-		if (this != player.GoalPlatform) meshRenderer.material.color = defaultColor;
+		if (this != _player.GoalPlatform) _meshRenderer.material.color = _defaultColor;
 	}
 }
