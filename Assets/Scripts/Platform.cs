@@ -11,8 +11,8 @@ public class Platform : MonoBehaviour
 	// General
 	[NonSerialized] public List<Platform> AdjacentPlatforms = new();
 	private Player _player;
-	private MeshRenderer _meshRenderer;
-	private Color _defaultColor;
+	private MeshRenderer[] _meshRenderers;
+	private List<Color> _defaultColors = new List<Color>();
 	private Color _hoverColor;
 	private Color _goalColor;
 
@@ -46,10 +46,10 @@ public class Platform : MonoBehaviour
 		SetStatus(Status.Unvisited);
 
 		// Get material
-		_meshRenderer = GetComponentInChildren<MeshRenderer>();
-		_defaultColor = _meshRenderer.material.color;
-		_hoverColor = _defaultColor + new Color(0.25f, 0.25f, 0.25f);
-		_goalColor = _defaultColor + new Color(0.5f, 0.5f, 0.0f);
+		_meshRenderers = GetComponentsInChildren<MeshRenderer>();
+		CacheDefaultColors();
+		_hoverColor = new Color(0.25f, 0.25f, 0.25f);
+		_goalColor = new Color(0.5f, 0.5f, 0.0f);
 
 		// Repeat for status indicator
 		statusMeshRenderer = statusIndicator.GetComponent<MeshRenderer>();
@@ -87,13 +87,39 @@ public class Platform : MonoBehaviour
 		return Vector3.Distance(transform.position, platform.transform.position);
 	}
 
+	// Cache default colors
+	private void CacheDefaultColors()
+	{
+		foreach (MeshRenderer meshRenderer in _meshRenderers)
+			foreach (Material material in meshRenderer.materials) _defaultColors.Add(material.color);
+	}
+
+	// Reset colors
+	private void ResetColors()
+	{
+		int materialIndex = 0;
+		foreach (MeshRenderer meshRenderer in _meshRenderers)
+			foreach (Material material in meshRenderer.materials)
+			{
+				material.color = _defaultColors[materialIndex++];
+			}
+	}
+
+	// Overlap default colors
+	private void OverlapDefaultColors(Color color)
+	{
+		int materialIndex = 0;
+		foreach (MeshRenderer meshRenderer in _meshRenderers)
+			foreach (Material material in meshRenderer.materials)
+			{
+				material.color = _defaultColors[materialIndex++] + color;
+			}
+	}
+
 	// When mouse enters collider
 	private void OnMouseEnter()
 	{
-		if (this != _player.GoalPlatform)
-		{
-			_meshRenderer.material.color = _hoverColor;
-		}
+		if (this != _player.GoalPlatform) OverlapDefaultColors(_hoverColor);
 	}
 
 	// When mouse is over collider
@@ -101,8 +127,8 @@ public class Platform : MonoBehaviour
 	{
 		if (Input.GetMouseButtonDown(0))
 		{
-			if (_player.GoalPlatform != null) _player.GoalPlatform._meshRenderer.material.color = _player.GoalPlatform._defaultColor;
-			_meshRenderer.material.color = _goalColor;
+			if (_player.GoalPlatform != null) _player.GoalPlatform.ResetColors();
+			OverlapDefaultColors(_goalColor);
 			_player.GoalPlatform = this;
 		}
 	}
@@ -110,6 +136,6 @@ public class Platform : MonoBehaviour
 	// When mouse exits collider
 	private void OnMouseExit()
 	{
-		if (this != _player.GoalPlatform) _meshRenderer.material.color = _defaultColor;
+		if (this != _player.GoalPlatform) ResetColors();
 	}
 }
