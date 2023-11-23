@@ -139,11 +139,11 @@ public class World : MonoBehaviour
 					priorityQueue.DecreasePriority(discoveredPlatform, discoveredDistance);
 					distancesFromStart[discoveredPlatform] = discoveredDistance;
 					previousPlatforms[discoveredPlatform] = poppedPlatform;
-					Debug.Log("Decrease priority, make sure this works if you see this");
+					// TODO: Make sure this works
 				}
 				else if (!visited.Contains(discoveredPlatform))
 				{
-					// Add patform to data structures
+					// Add platform to data structures
 					VisitPlatform(discoveredPlatform, poppedPlatform, discoveredDistance);
 					yield return new WaitForSeconds(_stepTime);
 				}
